@@ -1,0 +1,6 @@
+Baden-Württemberg	14
+Bayern	15
+Hessen	3
+Nordrhein-Westfalen	30
+Rheinland-Pfalz	1
+Schleswig Holstein	1

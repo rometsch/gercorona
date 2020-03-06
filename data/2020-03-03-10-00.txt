@@ -1,0 +1,13 @@
+Baden-Württemberg	26
+Bayern	35
+Berlin	3
+Brandenburg	1
+Bremen	1
+Hamburg	2
+Hessen	10
+Niedersachsen	1
+Nordrhein-Westfalen	101
+Rheinland-Pfalz	2
+Sachsen	1
+Schleswig Holstein	2
+Thüringen	1
