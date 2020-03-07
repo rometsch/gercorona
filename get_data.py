@@ -6,6 +6,7 @@ from urllib.error import HTTPError
 from urllib.request import urlopen
 import re
 import os
+import datetime
 
 def main():
     url = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.html"
@@ -13,17 +14,24 @@ def main():
     data_table = extract_data_table(res)
     data = get_data_dict(data_table)
     date = get_date(res)
-    data_file = "-".join(["{:02d}".format(int(n)) for n in date]) + ".txt"
+    date_str = "-".join(["{:02d}".format(int(n)) for n in date]) 
+    data_file = date_str + ".txt"
     data_file = os.path.join("data", data_file)
     if not os.path.exists(data_file):
         with open(data_file, "w") as outfile:
             for name, val in data.items():
                 print("{}\t{}".format(name, val), file=outfile)
+    print("{}: obtained data for {}".format(datetime.datetime.now(), date_str))
 
 def get_date(res):
     for e in res.findAll("p"):
         try:
             pattern = "\(Datenstand: ([\d]+)\.([\d]+).([\d]{4}), ([\d]{2}):([\d]{2}) Uhr\)"
+            m = re.search(pattern, str(e.contents[0]))
+            if m is not None:
+                date = m.groups()
+                break
+            pattern = "\(Stand: ([\d]+)\.([\d]+).([\d]{4}), ([\d]{2}):([\d]{2}) Uhr\)"
             m = re.search(pattern, str(e.contents[0]))
             if m is not None:
                 date = m.groups()
