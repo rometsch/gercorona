@@ -66,7 +66,7 @@ for fname in files:
                 if line == "": continue
                 parts = line.split()
                 num = int(parts[-1])
-                name = " ".join(parts[:-1])
+                name = "-".join(parts[:-1])
                 if name in database:
                     database[name][dt] = num
                 else:
@@ -78,7 +78,7 @@ fig, axes = plt.subplots(1,2, figsize=(10,6.4))
 names = sorted([n for n in database.keys()])
 for name in names:
     data = database[name]
-    dates = data.keys()
+    dates = [d for d in data.keys()]
     values = data.values()
     if all(np.array([x for x in values]) < 5):
         continue
@@ -97,8 +97,10 @@ box = axes[0].get_position()
 # Put a legend to the right of the current axis
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.legend(bbox_to_anchor=(1.05, 1))
-plt.title("SARS-CoV-2 infections for states with 5 or more cases\n(data from Robert Koch Institut)")
 
-plt.savefig("corona.png", bbox_inches='tight')
+last_date = sorted(dates)[-1]
+plt.title("SARS-CoV-2 infections for states with 5 or more cases\ndata from Robert Koch Institut, updated {}".format(last_date))
+
+plt.savefig("corona.png", bbox_inches='tight',dpi=300)
 
 #plt.show()
