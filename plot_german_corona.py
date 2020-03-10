@@ -56,21 +56,28 @@ files = [ os.path.join("data", f) for f in os.listdir("data")]
 database = {}
 for fname in files:
     datestr = os.path.basename(fname).split(".")[0]
-    dt = datetime_from_customstring(datestr)
+    try:
+        dt = datetime_from_customstring(datestr)
+    except AttributeError:
+        continue
     with open(fname, "r") as infile:
-        for line in infile:
-            if line == "": continue
-            parts = line.split()
-            num = int(parts[-1])
-            name = " ".join(parts[:-1])
-            if name in database:
-                database[name][dt] = num
-            else:
-                database[name] = {dt : num}
-
+        try:
+            for line in infile:
+                if line == "": continue
+                parts = line.split()
+                num = int(parts[-1])
+                name = " ".join(parts[:-1])
+                if name in database:
+                    database[name][dt] = num
+                else:
+                    database[name] = {dt : num}
+        except AttributeError:
+            pass        
 
 fig, axes = plt.subplots(1,2, figsize=(10,6.4))
-for name, data in database.items():
+names = sorted([n for n in database.keys()])
+for name in names:
+    data = database[name]
     dates = data.keys()
     values = data.values()
     if all(np.array([x for x in values]) < 5):

@@ -31,7 +31,7 @@ def get_date(res):
             if m is not None:
                 date = m.groups()
                 break
-            pattern = "\(Stand: ([\d]+)\.([\d]+).([\d]{4}), ([\d]{2}):([\d]{2}) Uhr\)"
+            pattern = "Stand: ([\d]+)\.([\d]+).([\d]{4}), ([\d]+):([\d]{2}) Uhr"
             m = re.search(pattern, str(e.contents[0]))
             if m is not None:
                 date = m.groups()
@@ -48,14 +48,14 @@ def get_data_dict(table):
     data = {}
     name = ""
     for n,e in enumerate(entries):
-        if n%3 == 0:
+        if n%4 == 0:
             name = e.contents[0]
-            if "Gesamt" in name:
-                break
-        if n%3 == 1:
+        if "Gesamt" in name:
+            break
+        if n%4 == 1:
             val = e.contents[0]
             data[name] = val
-        if n%3 == 2:
+        if n%4 == 2 or n%4 == 3:
             continue
     return data
 

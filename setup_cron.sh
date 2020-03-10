@@ -6,7 +6,7 @@ else
         BASEDIR="$(realpath $1)"
 fi
 SIMDIR="name"
-CRONSTR="0 * * * * cd "$BASEDIR"; ./get_data.py >> data/log.txt"
+CRONSTR="0 * * * * cd "$BASEDIR"; ./update.sh >> data/log.txt"
 # add to cron jobs
 RES=$(crontab -l | grep -F "$CRONSTR")
 if [[ -z "$RES" ]]; then
