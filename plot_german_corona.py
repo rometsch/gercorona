@@ -6,8 +6,8 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.dates import (YEARLY, DateFormatter, RRuleLocator, drange,
-                              rrulewrapper)
-
+                              rrulewrapper, date2num)
+from scipy.optimize import curve_fit
 
 def datetime_from_isoformat(timestring):
     """ Convert a time sting 'yyyy-mm-dd HH:MM' to a datetime object.
@@ -45,6 +45,13 @@ def datetime_from_customstring(timestring):
     year, month, day, hour, minute = [int(i) for i in m.groups()]
     return datetime.datetime(year, month, day, hour, minute)
 
+def exp_func(x, x0, c):
+    return np.exp(c*(x-x0))
+
+def get_exp_fit(xdata, ydata):
+    """ Fits an exponential function to the data and returns a function."""
+    popt, pcov = curve_fit(exp_func, xdata, ydata, p0 = (xdata[0], 1), bounds=(0, np.inf))
+    return (lambda x: exp_func(x, *popt) , popt)
 
 # data taken from
 # https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.html
@@ -77,14 +84,22 @@ for fname in files:
 fig, axes = plt.subplots(1,2, figsize=(10,6.4))
 names = sorted([n for n in database.keys()])
 for name in names:
+    print("Plotting:", name)
     data = database[name]
     dates = [d for d in data.keys()]
-    values = data.values()
-    if all(np.array([x for x in values]) < 5):
+    values = np.array([x for x in data.values()])
+    time = np.array(date2num(dates))
+    inds = time.argsort()
+    time = time[inds]
+    values = values[inds]
+    if all(np.array([x for x in values]) < 50):
         continue
+    fit, popt = get_exp_fit(time, values)
+    print(popt)
+    t_sample = np.linspace(time[0], time[-1] + 0.5*(time[-1] - time[0]), 500)
     for ax in axes:
-        ax.plot_date(dates, values, label=name)
-
+        line, = ax.plot_date(time, values, label=name)
+        line, = ax.plot(t_sample, fit(t_sample), color=line.get_color())
         formatter = DateFormatter('%y-%m-%d')
         ax.xaxis.set_major_formatter(formatter)
         ax.xaxis.set_tick_params(rotation=30, labelsize=10)

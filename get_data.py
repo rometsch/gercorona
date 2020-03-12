@@ -53,7 +53,7 @@ def get_data_dict(table):
         if "Gesamt" in name:
             break
         if n%4 == 1:
-            val = e.contents[0]
+            val = e.contents[0].split()[0]
             data[name] = val
         if n%4 == 2 or n%4 == 3:
             continue
