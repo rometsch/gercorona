@@ -69,22 +69,31 @@ for fname in files:
         continue
     with open(fname, "r") as infile:
         try:
+            total = 0
             for line in infile:
                 if line == "": continue
                 parts = line.split()
-                num = int(parts[-1])
+                num = int(parts[-1].replace(".",""))
+                total += num
                 name = "-".join(parts[:-1])
                 if name in database:
                     database[name][dt] = num
                 else:
                     database[name] = {dt : num}
+            name = "Gesamt"
+            num = total
+            if name in database:
+                database[name][dt] = num
+            else:
+                database[name] = {dt : num}
         except AttributeError:
             pass        
 
 fig, axes = plt.subplots(1,2, figsize=(10,6.4))
 names = sorted([n for n in database.keys()])
+
 for name in names:
-    print("Plotting:", name)
+    #print("Plotting:", name)
     data = database[name]
     dates = [d for d in data.keys()]
     values = np.array([x for x in data.values()])
@@ -95,8 +104,8 @@ for name in names:
     if all(np.array([x for x in values]) < 50):
         continue
     fit, popt = get_exp_fit(time, values)
-    print(popt)
-    t_sample = np.linspace(time[0], time[-1] + 0.5*(time[-1] - time[0]), 500)
+    #print(popt)
+    t_sample = np.linspace(time[0], time[-1] + 0.2*(time[-1] - time[0]), 500)
     for ax in axes:
         line, = ax.plot_date(time, values, label=name)
         line, = ax.plot(t_sample, fit(t_sample), color=line.get_color())
