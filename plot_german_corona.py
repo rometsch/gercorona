@@ -9,6 +9,16 @@ from matplotlib.dates import (YEARLY, DateFormatter, RRuleLocator, drange,
                               rrulewrapper, date2num)
 from scipy.optimize import curve_fit
 
+def get_style(n):
+    colors = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink", "tab:grey", "tab:olive", "tab:cyan"]
+    styles = ["o", "*"]
+    N = len(colors)
+    color = colors[n%N]
+    k = 0 if n < N else 1
+    style = styles[k]
+    return (style, color)
+
+
 def datetime_from_isoformat(timestring):
     """ Convert a time sting 'yyyy-mm-dd HH:MM' to a datetime object.
 
@@ -92,7 +102,7 @@ for fname in files:
 fig, axes = plt.subplots(1,2, figsize=(10,6.4))
 names = sorted([n for n in database.keys()])
 
-for name in names:
+for n, name in enumerate(names):
     #print("Plotting:", name)
     data = database[name]
     dates = [d for d in data.keys()]
@@ -106,8 +116,9 @@ for name in names:
     fit, popt = get_exp_fit(time, values)
     #print(popt)
     t_sample = np.linspace(time[0], time[-1] + 0.2*(time[-1] - time[0]), 500)
+    markerstyle, color = get_style(n)
     for ax in axes:
-        line, = ax.plot_date(time, values, label=name)
+        line, = ax.plot_date(time, values, color=color, marker=markerstyle, label=name)
         line, = ax.plot(t_sample, fit(t_sample), color=line.get_color())
         formatter = DateFormatter('%y-%m-%d')
         ax.xaxis.set_major_formatter(formatter)
