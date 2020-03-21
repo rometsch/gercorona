@@ -10,11 +10,19 @@ from bs4 import BeautifulSoup
 
 
 def main():
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("raw", exist_ok=True)
+
     url = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.html"
     res = get_webpage(url)
+    now = str(datetime.datetime.now()).replace(" ", "-").replace(":", "-")
+    raw_file = os.path.join("raw", "{}.html".format(now))
+    with open(raw_file, "w") as outfile:
+        print(res, file=outfile)
+    date = get_date(res)
+    remove_whitespaces(res)
     data_table = extract_data_table(res)
     data = get_data_dict(data_table)
-    date = get_date(res)
     date_str = "-".join(["{:02d}".format(int(n)) for n in date])
     data_file = date_str + ".txt"
     data_file = os.path.join("data", data_file)
@@ -24,6 +32,13 @@ def main():
                 print("{}\t{}".format(name, val), file=outfile)
     print("{}: obtained data for {}".format(datetime.datetime.now(), date_str))
 
+def remove_whitespaces(soup):
+    allowed_chars = ["-"]
+    for child in soup.children:
+        if child.string:
+            child.string = ''.join([ch for ch in child.string if ch.isalnum() or ch in allowed_chars])
+        else:
+            remove_whitespaces(child)
 
 def get_date(res):
     for e in res.findAll("p"):
@@ -49,15 +64,16 @@ def get_data_dict(table):
     entries = table.findAll("td")
     data = {}
     name = ""
+    N = 6
     for n, e in enumerate(entries):
-        if n % 4 == 0:
+        if n % N == 0:
             name = e.contents[0]
         if "Gesamt" in name:
             break
-        if n % 4 == 1:
+        if n % N == 1:
             val = e.contents[0].split()[0]
             data[name] = val
-        if n % 4 == 2 or n % 4 == 3:
+        else:
             continue
     return data
 
@@ -68,7 +84,6 @@ def get_webpage(url):
         page = urllib.request.Request(
             url, headers={'User-Agent': 'Mozilla/5.0'})
         infile = urllib.request.urlopen(page).read()
-        # Read the content as string decoded with ISO-8859-1
         html = infile.decode('utf-8')
     except HTTPError as e:
         print(e)
